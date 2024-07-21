@@ -1,0 +1,29 @@
+.reveal pre code {
+  background: white;
+}
+
+h1{
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+}
+
+.author small{
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 30pt;
+  font-family: monospace;
+}
+
+.highlight_title h2{
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+}
+
+.highlight_title strong{
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+}
+
+.title h1{
+  font-size: 128px;
+}

@@ -1,0 +1,384 @@
+= Databases : from ancient engineers manuscripts
+:idprefix:
+:title-slide-background-image: Default_I_need_a_picture_for_the_opening_slide_for_the_present_2.jpg
+:stem: asciimath
+:backend: html
+:source-highlighter: highlightjs
+:pygments-style: tango
+:revealjs_history: true
+:revealjs_theme: night
+:revealjs_controls: false
+:imagesdir: images
+:customcss: css/custom.css
+:revealjs_width: 1920
+:revealjs_height: 1080
+
+== about me
+
+Neo4j (a graph database) performance engineer
+
+over 20 years with JVM, +
+since early days of no native threads and, +
+no JIT and slow as hell GC
+
+speaker, coder, architect
+
+=== DISCLAIMER
+
+for the sake of simplicity and entertainent + 
+I have ignored some important concepts, +
+or presented them in a overly naive way
+
+there will be a list of references +
+at the end of presentation +
+if you want to go deeper
+
+=== WARNING
+
+Over years, in my profesional carrer I have developed strong affection to 
+programing languges and databases
+
+And I tend to get to emotional and excited when I am talking about it :)
+
+== what is a database?
+
+[quote,,Wikipedia]
+  In computing, a database is an organized collection of data or a type of data store based on the use of a database management system (DBMS), the software that interacts with end users, applications, and the database itself to capture and analyze the data.
+
+=== !
+
+[quote,,Wikipedia]
+  Formally, a "database" refers to a set of related data accessed through the use of a "database management system" (DBMS), which is an integrated set of computer software that allows users to interact with one or more databases and provides access to all of the data contained in the database (although restrictions may exist that limit access to particular data). The DBMS provides various functions that allow entry, storage and retrieval of large quantities of information and provides ways to manage how that information is organized. 
+
+=== WAT?
+
+image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExaGt4NDBoOHhhMmJ1am04bDBrNXVycmVlZjNianl3MnF2ZHlmcmg5YiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/4JVTF9zR9BicshFAb7/giphy.gif[]
+
+== history of databases
+
+A concept of a database is a as old as humanity +
+at the moment we realised that +
+we can persist our knowledge +
+and use to come up with new concepts and ideas +
+this is the moment databases where born
+
+=== DBAs at work
+
+image::TheGeniusInnovationThatMadetheGreatLibraryofAlexandriaWork.jpeg[background,size=contain]
+
+=== the moment indexes where invented
+
+image::TheGeniusInnovationThatMadetheGreatLibraryofAlexandriaWork.jpeg[background,size=contain]
+
+== database systems
+
+with invention of computers we were able +
+to store more data and make it accessible even faster +
+
+in these old days you had to desgin your own CPU +
+write compiler for it and then write your own database 
+
+== the 60s
+
+[quote]
+  Computerized databases started in the 1960s, when the use of computers became a more cost-effective option for private organizations. The history of computers and databases are interlinked. As prices dropped it became easier to shift data storage and databases to computers.
+
+=== !
+
+[quote]
+  There were two popular data models in this decade: a network model called CODASYL and a hierarchical model called IMS. One database system that proved to be a commercial success was the SABRE system that was used by IBM to help American Airlines manage its reservations data.
+
+== the 70's
+
+**The Introduction of the Relational Database**
+
+[quote]
+  E.F. Codd published an important paper that served as the introduction of the relational database, and his ideas changed the way people thought about databases. In his model, the database’s schema, or logical organization, is disconnected from physical information storage, and this became the standard principle for database systems.
+
+=== !
+
+[quote]
+  Two major relational database system prototypes were created between the years 1974 and 1977, and they were the Ingres, which was developed at UBC, and System R, created at IBM San Jose. Ingres used a query language known as QUEL, and it led to the creation of systems such as Ingres Corp., MS SQL Server, Sybase, Wang’s PACE, and Britton-Lee. 
+
+=== !
+
+[quote]
+  On the other hand, System R used the SEQUEL query language, and it contributed to the development of SQL/DS, DB2, Allbase, Oracle, and Non-Stop SQL. It was also in this decade that Relational Database Management System, or RDBMS, became a recognized term.
+
+== the 80's
+
+**SQL ascends to the throne**
+
+[quote]
+  Structured Query Language, or SQL, became the standard query language, selected by the American National Standards Institute in 1986 and the International Organization for Standardization in 1987.
+
+== the 90's
+
+**The internet**
+
+[quote]
+  The 1990s served a pivotal role in the advancement of databases and database software. Similar to the 1960s, a broader culture shift led to further developments in the industry. After a shakeout, most of the surviving companies sold complex database products at high prices.
+
+=== !
+
+[quote]
+  During the middle of the decade the advent of the Internet led to exponential growth of the database industry. Average desktop users began to use client-server database systems to access computer systems that contained legacy data. As more and more users purchased personal computers and went online, there became a larger need to enhance databases.
+
+=== !
+
+[quote]
+  Toward the end of the 1990s, increased investment in online businesses resulted in a rise in demand for Internet database connectors, such as Front Page, Active Server Pages, Java Servelets, Dream Weaver, ColdFusion, Enterprise Java Beans, and Oracle Developer 2000. The use of CGI, GCC, MySQL, Apache, and other systems brought open source solution to the Internet. With the increased use of point-of-sale technology, online transaction processing and online analytic processing began to come of age.
+
+=== the 2000's
+
+**NoSQL is reinvented**
+
+The circle is closing.
+
+== enough history, time for technology
+
+what is a real reason for database systems to exits?
+
+=== 640kb is not enough
+
+Database systems solve the problem of working with data that doesn't fit into RAM, or event single machine (but it is a different story)
+
+=== RAM is expensive 
+
+**but it is fast**
+
+**(and volatile)**
+
+=== !
+
+* Main memory is about $3.15 per GB (DDR4)
+* SSD storage is about $0.10 per GB
+* Hard disk storage is about $0.019 per GB
+
+=== !
+
+database systems growth was driven by commercial needs
+
+=== !
+
+[quote,,attributed to Pat Helland]
+  Database is a cache over event log
+
+=== !
+
+[quote,,Me]
+  Database is a an anticorruption layer for data access patterns
+
+== database management systems
+
+**a quick and dirty guide** +
+**for extremly busy developers**
+
+=== !
+
+for the sake of this discussion we will remove distributed databases from the picture +
+and focus on a single database server node
+
+and will take a bottom-up approach to explain how things work
+
+[role="highlight_title"]
+== storage
+
+image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExcWNnbHBqcjAzNGp1ZmkyZTI1MWticHRrNTR2M2dvZWQ2NmpzZzF1dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/N35rW3vRNeaDC/giphy.gif[background]
+
+=== !
+
+whatever you work with tables, graphs, documents which are structured data,
+at the end of the day you need to squeeze them into flat one-dimensional files
+
+=== !
+
+* fixed size vs variable size entities
+* unorded vs ordered flat files
+* schema vs schemaless entities
+
+=== fixed size vs variable size
+
+
+
+=== praise the machine
+
+disks are slow (unless you're rich enough to use NVRAM)
+
+=== unordered files
+
+* sequenced files
+* heap files
+* ISAM (indexed sequential access method)
+
+=== ordered files
+
+* hash files 
+* cluster files
+* B+ tree files
+* LSM (log structured merge trees)
+
+[role="highlight_title"]
+== block manager
+
+image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjl0OGZhcWJwMGhqN3g1dzFhbzRreHU4d2h1emZodDhuMTVxN3J6ayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Yh0qLwfpAogL9vVxhL/giphy.gif[background]
+
+=== !
+
+how to squeeze more data than you have available memory?
+
+you don't always need all the data + 
+(we call it liveset)
+
+block manager loads data on demand when needed +
+unloads when data is no longer used
+
+=== !
+
+when query engine needs specific entity + 
+row, document, node
+
+it requests it from block manager, +
+when block manager doesn't have it memory +
+it loads it from disk
+
+=== !
+
+when query engine modifies the entity, +
+block manager marks it as "dirty", +
+and writes to a storage when needed
+
+for example when block is evicted,
+to reclaim memory for another block
+
+=== !
+
+database data is organized into blocks +
+data is always read and written as a whole block
+
+=== block eviction
+
+it is a set of cache eviction algorithms, like:
+
+* LRU
+* LFU
+* LIRS (Low Inter-reference Recency Set)
+* TinyLFU
+* Clock Pro
+* ... and others
+
+What we are looking here is a good balance between hit ratio and eviction algorhitms overhead
+
+[role="highlight_title"]
+== locking
+
+image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExeDFiZXdtajhkOGNzeHFpNXdyMGNoZnJ4Z3BoaWViNnJ4ZXQzamNiYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/mIvrv5Qe0kHlu/giphy.gif[background]
+
+=== !
+
+This is where things are getting messy, a little bit
+
+what happens when multiple threads are going to write to the same block?
+
+=== locking protocols
+
+single query can modify multiple blocks during its execution
+
+database systems employ techniques called locking protocols +
+to efficently manage locks and also avoid deadlocks +
+and what is most important, +
+**ensure consistency of our data**
+
+=== Concurrency control protocols
+
+* Lock Based Concurrency Control Protocol
+* Time Stamp Concurrency Control Protocol
+* Validation Based Concurrency Control Protocol
+
+=== simplistic lock protocol
+
+It is the simplest way of locking the data while transaction. + 
+Simplistic lock-based protocols allow all the transactions +
+to get the lock on the data before insert or delete or update on it. +
+It will unlock the data item after completing the transaction.
+
+=== two-phase locking protocol
+
+For 2PL, the only used data-access locks are read-locks (shared locks) and write-locks (exclusive locks). Below are the rules for read-locks and write-locks:
+
+* A transaction is allowed to read an object if and only if it is holding a read-lock or write-lock on that object.
+* A transaction is allowed to write an object if and only if it is holding a write-lock on that object.
+* A schedule (i.e., a set of transactions) is allowed to hold multiple locks on the same object simultaneously if and only if none of those locks are write-locks. If a disallowed lock attempts on being held simultaneously, it will be blocked.
+
+=== !
+
+By the 2PL protocol, locks are applied and removed in two phases:
+
+* Expanding phase: locks are acquired and no locks are released.
+* Shrinking phase: locks are released and no locks are acquired.
+
+The two phase locking rules can be summarized as: each transaction must never acquire a lock after it has released a lock. 
+
+=== !
+
+What about table level or row level locking ?
+
+They are another level of concurrency control, +
+implemented higher in a database systems stack
+
+=== !
+
+[quote,,What are some best practices for implementing row-level locking?]
+  Evaluate the average row size, and based on that number of rows you will have on one page. If you have hundreds of rows on a page stop right here because you won't see any increase throughput. All the contention will just switch from row level to page level and explicit locking will have no positive impact.
+
+=== alternatives?
+
+copy-on-write? //
+
+[role="highlight_title"]
+== transaction log
+
+image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExaTJ2cHdhdml3dmE2Z2R5bzRjcGt6dW5nMG8xcHJsc3Izc3Y2aGFvZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/h2IsKmfwNh3I4/giphy.gif[background]
+
+=== !
+As you can imagine there can be a situation when, +
+transaction is commited, + 
+but block manager haven't written all the changes to storage
+
+you may ask, why it doesn't happen on every commit?
+
+=== need for speed
+
+=== !
+
+REMEMBER
+
+file system is slow
+
+=== atomicity
+
+there is no way to ensure writing multiple blocks will be atomic,
+operating systems and hardware doesn't provide such guraantees 
+
+=== durability
+
+the fact that you asked operating system to write block of data, doesn't mean it is persistent
+when system call returns, because operating system also has a thing called page cache
+
+you would have to call `fsync` after every write (and some databases have this setting)
+
+(unless you force O_DIRECT mode, but this whole another flamewar in database and operating system community)
+
+=== filesystems are first databases
+
+=== transaction log
+
+=== transaction state
+
+== query engine
+
+
+
+== query planner
+
+https://www.javatpoint.com/what-is-database
