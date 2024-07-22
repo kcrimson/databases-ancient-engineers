@@ -49,9 +49,10 @@ And I tend to get to emotional and excited when I am talking about it :)
 [quote,,Wikipedia]
   Formally, a "database" refers to a set of related data accessed through the use of a "database management system" (DBMS), which is an integrated set of computer software that allows users to interact with one or more databases and provides access to all of the data contained in the database (although restrictions may exist that limit access to particular data). The DBMS provides various functions that allow entry, storage and retrieval of large quantities of information and provides ways to manage how that information is organized. 
 
+[role="highlight_title"]
 === WAT?
 
-image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExaGt4NDBoOHhhMmJ1am04bDBrNXVycmVlZjNianl3MnF2ZHlmcmg5YiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/4JVTF9zR9BicshFAb7/giphy.gif[]
+image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExaGt4NDBoOHhhMmJ1am04bDBrNXVycmVlZjNianl3MnF2ZHlmcmg5YiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/4JVTF9zR9BicshFAb7/giphy.gif[background]
 
 == history of databases
 
@@ -198,8 +199,6 @@ at the end of the day you need to squeeze them into flat one-dimensional files
 
 === fixed size vs variable size
 
-
-
 === praise the machine
 
 disks are slow (unless you're rich enough to use NVRAM)
@@ -325,14 +324,26 @@ What about table level or row level locking ?
 They are another level of concurrency control, +
 implemented higher in a database systems stack
 
+we call these low-level (block manager) concurrency controls latch,
+and higher-level (like table or row level) locks
+
 === !
 
 [quote,,What are some best practices for implementing row-level locking?]
   Evaluate the average row size, and based on that number of rows you will have on one page. If you have hundreds of rows on a page stop right here because you won't see any increase throughput. All the contention will just switch from row level to page level and explicit locking will have no positive impact.
 
-=== alternatives?
+=== shadow pages
 
-copy-on-write? //
+most databases implement two types of latches, +
+shared and exclusive (aka read and write)
+
+when we lock on a block for write, + 
+to isolate reads from writes, +
+we often use technique called shadow pages +
+where we create a copy of a actual block,
+and make modifications in a copy, +
+when transaction is commited we replace +
+original block with newly create block
 
 [role="highlight_title"]
 == transaction log
@@ -340,6 +351,7 @@ copy-on-write? //
 image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExaTJ2cHdhdml3dmE2Z2R5bzRjcGt6dW5nMG8xcHJsc3Izc3Y2aGFvZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/h2IsKmfwNh3I4/giphy.gif[background]
 
 === !
+
 As you can imagine there can be a situation when, +
 transaction is commited, + 
 but block manager haven't written all the changes to storage
@@ -364,15 +376,27 @@ operating systems and hardware doesn't provide such guraantees
 the fact that you asked operating system to write block of data, doesn't mean it is persistent
 when system call returns, because operating system also has a thing called page cache
 
-you would have to call `fsync` after every write (and some databases have this setting)
-
-(unless you force O_DIRECT mode, but this whole another flamewar in database and operating system community)
-
 === filesystems are first databases
 
-=== transaction log
+=== !
+
+you would have to call `fsync` after every write +
+(and most databases have this setting)
+
+(unless you force O_DIRECT mode, +
+but this whole another flamewar +
+in database and operating systems community)
+
+=== journal vs write-ahead log
 
 === transaction state
+
+transaction state has to be applied +
+to query results, +
+so within the scope of transaction +
+you can see your own writes
+
+=== recoverability
 
 [role="highlight_title"]
 == query engine
@@ -382,8 +406,6 @@ image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExdTJqY242OGtoYno0ODR4OXlneWQ1
 === !
 
 query is parsed and transformed into a query plan
-
-query plan is tree-like structure of operators
 
 query engine is responsible for executing query
 
@@ -407,46 +429,57 @@ Projection(users.name)
 
 === query processing models
 
-Operators in the query plan are arranged in a tree.
+Operators are function-like pieces of code +
+which take tuples an emit tuples as its result
 
-Data flows from the leaves of this tree towards the root. The output of the root node in the tree is the result of the query. 
+Operators in the query plan are arranged into a tree.
 
-Typically operators are binary (1–2 children). The same query plan can be executed in multiple
-ways.
+Typically operators are binary (1–2 children) +
+The same query plan can be executed in multiple ways
 
-Operators are function-like pieces of code which take a set of tuples an emit a set of tuples as its result.
+Data flows from the leaves of this tree towards the root +
+The output of the root node in the tree is the result of the query 
 
 === !
 
-A query processing model defines how the system executes a query plan. 
+A query processing model defines how the system executes a query plan.
+
 It specifies things like the direction in which the query plan is evaluated and what kind of data is passed between operators along the way. 
 
 There are different models of processing models that have various trade-offs for different workloads.
 
 These models can also be implemented to invoke the operators either from top-to-bottom or from bottom-to-top. Although the top-to-bottom approach is much more common, the bottom-to-top approach can allow for tighter control of caches/registers in pipelines.
 
-=== WAT?
-
-=== !
-
-=== !
+=== execution models
 
 The three execution models that we consider are:
 
-* Iterator Model
-* Materialization Model
-* Vectorized / Batch Model
+* iterator model
+* materialization model
+* vectorized / batch Model
 
+[role="highlight_title"]
+=== WAT?
+
+image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExaGt4NDBoOHhhMmJ1am04bDBrNXVycmVlZjNianl3MnF2ZHlmcmg5YiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/4JVTF9zR9BicshFAb7/giphy.gif[background]
+
+[role="highlight_title"]
 === show me the code
 
-We are going to take a sneak peak under the hood of most common query processing model, +
-iterator model, know also as volcano model
+image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNDZybHdvNXZ1Mm5tNGt2MDlqM3d1M3ZxaTNrZmtvM21uOWVycDBlOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xoicctrOv5aGw6mCZi/giphy.gif[background]
+
+=== !
+
+We are going to take a sneak peak +
+under the hood of most common +
+query processing model, iterator model, +
+know also as volcano model
 
 === !
 
 [source,java]
 ----
-public interface Operator {
+interface Operator {
     void open();
     Tuple next();
     void close();
@@ -460,7 +493,7 @@ public interface Operator {
 import java.util.List;
 import java.util.Iterator;
 
-public class Scan implements Operator {
+class Scan implements Operator {
     private Cursor<Tuple> cursor;
     private Iterator<Tuple> iterator;
 
@@ -495,7 +528,7 @@ public class Scan implements Operator {
 ----
 import java.util.function.Predicate;
 
-public class Selection implements Operator {
+class Selection implements Operator {
     private Operator child;
     private Predicate<Tuple> predicate;
 
@@ -531,7 +564,7 @@ public class Selection implements Operator {
 
 [source,java]
 ----
-public class Projection implements Operator {
+class Projection implements Operator {
     private Operator child;
     private int[] columns;
 
@@ -572,11 +605,11 @@ public class Projection implements Operator {
 import java.util.Arrays;
 import java.util.List;
 
-public class QueryExecution {
+class QueryExecution {
     public static void main(String[] args) {
         // Sample data
         List<Tuple> data = Arrays.asList(
-            new Tuple(new Object[]{1, "Alice", 30}),
+            new Tuple(new Object[]{1, "Alice", 15}),
             new Tuple(new Object[]{2, "Bob", 25}),
             new Tuple(new Object[]{3, "Charlie", 35})
         );
@@ -601,6 +634,64 @@ public class QueryExecution {
 }
 ----
 
+[role="highlight_title"]
 == query planner
 
-https://www.javatpoint.com/what-is-database
+image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExaTJ2MXhpYmxmdnd1bzg0dHNmamtrdnRvb3piNDJxMjZtcDF4cHNzdCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/usz0fqhUiVxSs6IUKB/giphy.gif[background]
+
+=== !
+
+Database system needs to translate a query into an executable query plan. But there are
+different ways to execute each operator in a query plan (e.g., join algorithms, predicates orders) and there will be differences in performance among these plans.
+
+=== is this optimal query plan?
+
+[source,sql]
+----
+SELECT name FROM users where users.age>18 ORDER BY users.age LIMIT 1
+----
+
+[source]
+----
+SequenceScan(users)
+Filter(users.age>18)
+Sort(users.age)
+Limit(1)
+Projection(users.name)
+----
+
+=== !
+
+[source]
+----
+RangeIndexScan(users.age>18)
+Sort(users.age)
+Limit(1)
+Projection(users.name)
+----
+
+=== query planner
+
+[quote,,]
+  The first implementation of a query optimizer was IBM System R and was designed in the 1970s. Prior to this, people did not believe that a DBMS could ever construct a query plan better than a human. Many concepts and design decisions from the System R optimizer are still in use today.
+
+=== who is faster?
+
+* The first approach is to use static rules, or heuristics. Heuristics match portions of the query with known patterns to assemble a plan. These rules transform the query to remove inefficiencies. Although these rules may require consultation of the catalog to understand the structure of the data, they never need to examine the data itself.
+* An alternative approach is to use cost-based search to read the data and estimate the cost of executing equivalent plans. The cost model chooses the plan with the lowest cost
+
+=== !
+
+
+
+=== !
+
+=== references
+
+https://www.db-book.com/[Database System Concepts] +
+https://15445.courses.cs.cmu.edu/fall2024/[Introduction to database systems, Andy Pavlo course] +
+https://www.databass.dev/[Database Internals: A Deep Dive Into How Distributed Data Systems Work] +
+https://radiki.dev/[Chris Gioran (former Neo4j architect) blog about implementing databases] +
+https://www.amazon.com/Database-Design-Implementation-Data-Centric-Applications/dp/3030338355[Database Design and Implementation] +
+[Concurrency Control in Transactions Processing Systems] +
+[Transaction Processing: Concepts and Techniques] 
