@@ -4,7 +4,6 @@
 :stem: asciimath
 :backend: html
 :source-highlighter: highlightjs
-:pygments-style: tango
 :revealjs_history: true
 :revealjs_theme: night
 :revealjs_controls: false
@@ -375,9 +374,232 @@ you would have to call `fsync` after every write (and some databases have this s
 
 === transaction state
 
+[role="highlight_title"]
 == query engine
 
+image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExdTJqY242OGtoYno0ODR4OXlneWQ1cHlwemUxcTdvcHJ0eGdranE4cyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/vf5TjQrio0TBK/giphy.gif[background]
 
+=== !
+
+query is parsed and transformed into a query plan
+
+query plan is tree-like structure of operators
+
+query engine is responsible for executing query
+
+=== Query
+
+[source,sql]
+----
+SELECT name FROM users where users.age>18 ORDER BY users.age LIMIT 1
+----
+
+=== Query plan
+
+[source]
+----
+SequenceScan(users)
+Filter(users.age>18)
+Sort(users.age)
+Limit(1)
+Projection(users.name)
+----
+
+=== query processing models
+
+Operators in the query plan are arranged in a tree.
+
+Data flows from the leaves of this tree towards the root. The output of the root node in the tree is the result of the query. 
+
+Typically operators are binary (1–2 children). The same query plan can be executed in multiple
+ways.
+
+Operators are function-like pieces of code which take a set of tuples an emit a set of tuples as its result.
+
+=== !
+
+A query processing model defines how the system executes a query plan. 
+It specifies things like the direction in which the query plan is evaluated and what kind of data is passed between operators along the way. 
+
+There are different models of processing models that have various trade-offs for different workloads.
+
+These models can also be implemented to invoke the operators either from top-to-bottom or from bottom-to-top. Although the top-to-bottom approach is much more common, the bottom-to-top approach can allow for tighter control of caches/registers in pipelines.
+
+=== WAT?
+
+=== !
+
+=== !
+
+The three execution models that we consider are:
+
+* Iterator Model
+* Materialization Model
+* Vectorized / Batch Model
+
+=== show me the code
+
+We are going to take a sneak peak under the hood of most common query processing model, +
+iterator model, know also as volcano model
+
+=== !
+
+[source,java]
+----
+public interface Operator {
+    void open();
+    Tuple next();
+    void close();
+}
+----
+
+=== !
+
+[source,java]
+----
+import java.util.List;
+import java.util.Iterator;
+
+public class Scan implements Operator {
+    private Cursor<Tuple> cursor;
+    private Iterator<Tuple> iterator;
+
+    public Scan(Cursor<Tuple> cursor) {
+        this.cursor = cursor;
+    }
+
+    @Override
+    public void open() {
+        iterator = cursor.iterator();
+    }
+
+    @Override
+    public Tuple next() {
+        if (iterator.hasNext()) {
+            return iterator.next();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public void close() {
+        iterator = null;
+    }
+}
+----
+
+=== !
+
+[source,java]
+----
+import java.util.function.Predicate;
+
+public class Selection implements Operator {
+    private Operator child;
+    private Predicate<Tuple> predicate;
+
+    public Selection(Operator child, Predicate<Tuple> predicate) {
+        this.child = child;
+        this.predicate = predicate;
+    }
+
+    @Override
+    public void open() {
+        child.open();
+    }
+
+    @Override
+    public Tuple next() {
+        Tuple tuple;
+        while ((tuple = child.next()) != null) {
+            if (predicate.test(tuple)) {
+                return tuple;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void close() {
+        child.close();
+    }
+}
+----
+
+=== !
+
+[source,java]
+----
+public class Projection implements Operator {
+    private Operator child;
+    private int[] columns;
+
+    public Projection(Operator child, int[] columns) {
+        this.child = child;
+        this.columns = columns;
+    }
+
+    @Override
+    public void open() {
+        child.open();
+    }
+
+    @Override
+    public Tuple next() {
+        Tuple tuple = child.next();
+        if (tuple == null) {
+            return null;
+        }
+        Object[] projectedValues = new Object[columns.length];
+        for (int i = 0; i < columns.length; i++) {
+            projectedValues[i] = tuple.getValue(columns[i]);
+        }
+        return new Tuple(projectedValues);
+    }
+
+    @Override
+    public void close() {
+        child.close();
+    }
+}
+----
+
+=== !
+
+[source,java]
+----
+import java.util.Arrays;
+import java.util.List;
+
+public class QueryExecution {
+    public static void main(String[] args) {
+        // Sample data
+        List<Tuple> data = Arrays.asList(
+            new Tuple(new Object[]{1, "Alice", 30}),
+            new Tuple(new Object[]{2, "Bob", 25}),
+            new Tuple(new Object[]{3, "Charlie", 35})
+        );
+
+        // Scan operator
+        Scan scan = new Scan(data);
+
+        // Selection operator (age > 18)
+        Selection selection = new Selection(scan, tuple -> ((int) tuple.getValue(2)) > 18);
+
+        // Projection operator (select name)
+        Projection projection = new Projection(selection, new int[]{1});
+
+        // Execute query
+        projection.open();
+        Tuple tuple;
+        while ((tuple = projection.next()) != null) {
+            System.out.println(Arrays.toString(tuple.values));
+        }
+        projection.close();
+    }
+}
+----
 
 == query planner
 
