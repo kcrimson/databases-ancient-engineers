@@ -1,6 +1,8 @@
-= Databases : from ancient engineers manuscripts
+= Databases
+from ancient engineers manuscripts
 :idprefix:
 :title-slide-background-image: Default_I_need_a_picture_for_the_opening_slide_for_the_present_2.jpg
+:title-slide-background-size: cover
 :stem: asciimath
 :backend: html
 :source-highlighter: highlightjs
@@ -24,7 +26,7 @@ speaker, coder, architect
 
 === DISCLAIMER
 
-for the sake of simplicity and entertainent + 
+for the sake of simplicity and entertainment + 
 I have ignored some important concepts, +
 or presented them in a overly naive way
 
@@ -34,8 +36,9 @@ if you want to go deeper
 
 === WARNING
 
-Over years, in my profesional carrer I have developed strong affection to 
-programing languges and databases
+Over years, in my professional  +
+I have developed strong affection to + 
+programming languages and databases
 
 And I tend to get to emotional and excited when I am talking about it :)
 
@@ -57,25 +60,22 @@ image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExaGt4NDBoOHhhMmJ1am04bDBrNXVy
 == history of databases
 
 A concept of a database is a as old as humanity +
-at the moment we realised that +
+at the moment we realized that +
 we can persist our knowledge +
 and use to come up with new concepts and ideas +
 this is the moment databases where born
 
+[role="highlight_title"]
 === DBAs at work
 
-image::TheGeniusInnovationThatMadetheGreatLibraryofAlexandriaWork.jpeg[background,size=contain]
-
-=== the moment indexes where invented
-
-image::TheGeniusInnovationThatMadetheGreatLibraryofAlexandriaWork.jpeg[background,size=contain]
+image::TheGeniusInnovationThatMadetheGreatLibraryofAlexandriaWork.jpeg[background,size=cover]
 
 == database systems
 
 with invention of computers we were able +
 to store more data and make it accessible even faster +
 
-in these old days you had to desgin your own CPU +
+in these old days you had to design your own CPU +
 write compiler for it and then write your own database 
 
 == the 60s
@@ -141,7 +141,8 @@ what is a real reason for database systems to exits?
 
 === 640kb is not enough
 
-Database systems solve the problem of working with data that doesn't fit into RAM, or event single machine (but it is a different story)
+Database systems solve the problem of working with data that doesn't fit into RAM, +
+or event single machine (but it is a different story)
 
 === RAM is expensive 
 
@@ -157,7 +158,13 @@ Database systems solve the problem of working with data that doesn't fit into RA
 
 === !
 
-database systems growth was driven by commercial needs
+we also need guarantees +
+(and of course we can relax some of these)
+
+**A**tomicity +
+**I**solation +
+**C**onsistency +
+**D**urability
 
 === !
 
@@ -167,16 +174,17 @@ database systems growth was driven by commercial needs
 === !
 
 [quote,,Me]
-  Database is a an anticorruption layer for data access patterns
+  Database is a an anti-corruption layer for data access patterns
 
 == database management systems
 
 **a quick and dirty guide** +
-**for extremly busy developers**
+**for extremely busy developers**
 
 === !
 
-for the sake of this discussion we will remove distributed databases from the picture +
+for the sake of this discussion +
+we will remove distributed databases from the picture +
 and focus on a single database server node
 
 and will take a bottom-up approach to explain how things work
@@ -188,20 +196,22 @@ image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExcWNnbHBqcjAzNGp1ZmkyZTI1MWti
 
 === !
 
-whatever you work with tables, graphs, documents which are structured data,
-at the end of the day you need to squeeze them into flat one-dimensional files
+whatever you work with tables, graphs, documents +
+which are structured data, +
+at the end of the day +
+you need to squeeze them into flat, one-dimensional files
 
-=== !
+=== important factors
 
-* fixed size vs variable size entities
-* unorded vs ordered flat files
-* schema vs schemaless entities
-
-=== fixed size vs variable size
+* storing entities as fixed size vs variable size records
+* storing entities unordered vs ordered 
+* schema vs schemaless
 
 === praise the machine
 
 disks are slow (unless you're rich enough to use NVRAM)
+
+operating system always read/writes data in fixed size pages
 
 === unordered files
 
@@ -209,12 +219,65 @@ disks are slow (unless you're rich enough to use NVRAM)
 * heap files
 * ISAM (indexed sequential access method)
 
+=== heap files
+
+* heap files store entities in blocks
+* every block contains 1 or more entities
+* you add entities to first available and free block, 
+* when there is not enough space, new block is allocated
+
+=== !
+
+image::https://static.javatpoint.com/dbms/images/dbms-heap-file-organization.png[]
+
+=== pros & cons
+
+* fairly easy to implement
+* writes are fast, you always append at the end of file
+* random access is **SLOW**
+* space reclamation is **TRICKY**
+
 === ordered files
 
 * hash files 
 * cluster files
 * B+ tree files
 * LSM (log structured merge trees)
+
+=== B+ tree
+
+a default storage for indexes in many databases
+
+* The B+ tree is a balanced binary search tree. It follows a multi-level index format.
+* In the B+ tree, leaf nodes denote actual data pointers. B+ tree ensures that all leaf nodes remain at the same height.
+* In the B+ tree, the leaf nodes are linked using a link list. Therefore, a B+ tree can support random access as well as sequential access.
+* In the B+ tree, every leaf node is at equal distance from the root node. The B+ tree is of the order n where n is fixed for every B+ tree.
+
+=== !
+
+* It contains an internal node and leaf node.
+* The leaf node of the B+ tree can contain at least n/2 record pointers and n/2 key values.
+* At most, a leaf node contains n record pointer and n key values.
+* Every leaf node of the B+ tree contains one block pointer P to point to next leaf node.
+
+=== !
+
+image::https://static.javatpoint.com/dbms/images/dbms-b-plus-tree.png[]
+
+=== pros & cons
+
+* O(log n) search, insertion and deletion time complexity
+* helpful for query optimization since they may be used to sort data and range queries
+* require more space than other types of indexes, which can be a concern for databases with limited storage
+* not as efficient for write-heavy workloads, as every update to the index requires a disk write operation
+
+=== best of both worlds
+
+why no always use B+ tree?
+
+imagine that most of the time your entities are bigger than single block?
+
+most of databases use mixture of heap/sequential files with hash/b+tree indexes
 
 [role="highlight_title"]
 == block manager
@@ -265,7 +328,8 @@ it is a set of cache eviction algorithms, like:
 * Clock Pro
 * ... and others
 
-What we are looking here is a good balance between hit ratio and eviction algorhitms overhead
+What we are looking here is a good balance +
+between hit ratio and eviction algorithms overhead
 
 [role="highlight_title"]
 == locking
@@ -283,7 +347,7 @@ what happens when multiple threads are going to write to the same block?
 single query can modify multiple blocks during its execution
 
 database systems employ techniques called locking protocols +
-to efficently manage locks and also avoid deadlocks +
+to efficiently manage locks and also avoid deadlocks +
 and what is most important, +
 **ensure consistency of our data**
 
@@ -324,7 +388,7 @@ What about table level or row level locking ?
 They are another level of concurrency control, +
 implemented higher in a database systems stack
 
-we call these low-level (block manager) concurrency controls latch,
+we call these low-level (block manager) concurrency controls latch, +
 and higher-level (like table or row level) locks
 
 === !
@@ -334,15 +398,12 @@ and higher-level (like table or row level) locks
 
 === shadow pages
 
-most databases implement two types of latches, +
-shared and exclusive (aka read and write)
-
 when we lock on a block for write, + 
 to isolate reads from writes, +
 we often use technique called shadow pages +
 where we create a copy of a actual block,
 and make modifications in a copy, +
-when transaction is commited we replace +
+when transaction is committed we replace +
 original block with newly create block
 
 [role="highlight_title"]
@@ -353,28 +414,30 @@ image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExaTJ2cHdhdml3dmE2Z2R5bzRjcGt6
 === !
 
 As you can imagine there can be a situation when, +
-transaction is commited, + 
+transaction is committed, + 
 but block manager haven't written all the changes to storage
 
 you may ask, why it doesn't happen on every commit?
 
+[role="highlight_title"]
 === need for speed
 
-=== !
+image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExa3c3cGYzM3NvbnF2NDZzMjY1aHIwYWYxNXZ0dWNwNG1uNTdkbW0zdSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3ZrH1fpTB7H4M3Jk4b/giphy.gif[background]
 
-REMEMBER
+=== REMEMBER
 
 file system is slow
 
 === atomicity
 
-there is no way to ensure writing multiple blocks will be atomic,
-operating systems and hardware doesn't provide such guraantees 
+there is no way to ensure writing multiple blocks will be atomic, +
+operating systems and hardware doesn't provide such guarantees 
 
 === durability
 
-the fact that you asked operating system to write block of data, doesn't mean it is persistent
-when system call returns, because operating system also has a thing called page cache
+the fact that you asked operating system to write block of data, +
+doesn't mean it is persistent when system call returns, +
+because operating system also has a thing called page cache
 
 === filesystems are first databases
 
@@ -387,7 +450,41 @@ you would have to call `fsync` after every write +
 but this whole another flamewar +
 in database and operating systems community)
 
-=== journal vs write-ahead log
+=== journal file
+
+When a transaction modifies a page, the DBMS copies the original page to a separate journal file before overwriting the master version. After restarting, if a journal file exists, then the DBMS restores it to undo changes from uncommited transactions.
+
+=== write ahead log
+
+With write-ahead logging, the DBMS records all the changes made to the database in a log file (on stable storage) before the change is made to a disk page. + 
+The log contains sufficient information to perform the necessary undo and redo actions to restore the database after a crash. +
+The DBMS must write to disk the log file records that correspond to changes made to a database object before it can flush that object to disk
+
+=== !
+
+The DBMS first stages all of a transaction’s log records in volatile storage. All log records pertaining to an updated page are then written to non-volatile storage before the page itself is allowed to be overwritten in non-volatile storage. +
+A transaction is not considered committed until all its log records have been written to
+stable storage.
+
+=== !
+
+When the transaction starts, write a <BEGIN> record to the log for each transaction to mark its starting point. +
+When a transaction finishes, write a <COMMIT> record to the log and make sure all log records are flushed before it returns an acknowledgment to the application. 
+
+=== !
+
+Each log entry contains information about the change to a single object:
+
+* Transaction ID.
+* Object ID.
+* Before Value (used for UNDO).
+* After Value (used for REDO).
+
+=== !
+
+The DBMS must flush all of a transaction’s log entries to disk before it can tell the outside world that a transaction has successfully committed. +
+The system can use the “group commit” optimization to batch multiple log flushes together to amortize overhead. + 
+The DBMS can write dirty pages to disk whenever it wants as long as it’s after flushing the corresponding log records.
 
 === transaction state
 
@@ -395,8 +492,6 @@ transaction state has to be applied +
 to query results, +
 so within the scope of transaction +
 you can see your own writes
-
-=== recoverability
 
 [role="highlight_title"]
 == query engine
@@ -641,8 +736,8 @@ image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExaTJ2MXhpYmxmdnd1bzg0dHNmamtr
 
 === !
 
-Database system needs to translate a query into an executable query plan. But there are
-different ways to execute each operator in a query plan (e.g., join algorithms, predicates orders) and there will be differences in performance among these plans.
+Database system needs to translate a query into an executable query plan. +
+But there are different ways to execute each operator in a query plan (e.g., join algorithms, predicates orders) and there will be differences in performance among these plans.
 
 === is this optimal query plan?
 
@@ -680,11 +775,50 @@ Projection(users.name)
 * The first approach is to use static rules, or heuristics. Heuristics match portions of the query with known patterns to assemble a plan. These rules transform the query to remove inefficiencies. Although these rules may require consultation of the catalog to understand the structure of the data, they never need to examine the data itself.
 * An alternative approach is to use cost-based search to read the data and estimate the cost of executing equivalent plans. The cost model chooses the plan with the lowest cost
 
+=== query costs
+
+* filesystem access
+* memory usage for query (aggregating operators, like sort, average)
+* network
+* CPU
+
 === !
 
+The planner/optimizer generates a mapping of a logical algebra expression to the optimal equivalent physical algebra expression. +
+The logical plan is roughly equivalent to the relational algebra expressions in the query.
+Physical operators define a specific execution strategy using an access path for the different operators in the query plan. +
+Physical plans may depend on the physical format of the data that is processed (i.e. sorting,
+compression).
 
+=== logical plan optimizations
 
-=== !
+* Perform filters as early as possible (predicate pushdown).
+* Reorder predicates so that the DBMS applies the most selective one first.
+* Breakup a complex predicate and pushing it down (split conjunctive predicates)
+* Perform projections as early as possible to create smaller tuples and reduce intermediate results (projection pushdown).
+* Project out all attributes except the ones requested or requires.
+* The ordering of JOIN operations is a key determinant of query performance. 
+
+=== physical plan optimizations
+
+* index selection
+* join operators implementation
+* sorting implementation
+* index back projections
+
+=== it is all cardinality
+
+how many tuples are returned by operator? +
+you want the most selective operator +
+in the beginning of the pipeline
+
+so you need to collect statistical information, +
+and use it to prepare most optimal plan
+
+[role="highlight_title"]
+=== distributed databases?
+
+image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExOWNseXo4cWZqczE0YnkwM3NmaW1hdzI3b3pxdnU0Z3V0ZTNjc2Q4cyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/O5oRZiBtdSqS3K7YnE/giphy.gif[background]
 
 === references
 
@@ -693,5 +827,10 @@ https://15445.courses.cs.cmu.edu/fall2024/[Introduction to database systems, And
 https://www.databass.dev/[Database Internals: A Deep Dive Into How Distributed Data Systems Work] +
 https://radiki.dev/[Chris Gioran (former Neo4j architect) blog about implementing databases] +
 https://www.amazon.com/Database-Design-Implementation-Data-Centric-Applications/dp/3030338355[Database Design and Implementation] +
-[Concurrency Control in Transactions Processing Systems] +
-[Transaction Processing: Concepts and Techniques] 
+https://www.amazon.com/Concurrency-Control-Transactions-Processing-Systems/dp/3639340248[Concurrency Control in Transactions Processing Systems] +
+https://www.amazon.com/Transaction-Processing-Concepts-Techniques-Management[Transaction Processing: Concepts and Techniques] 
+
+[role="highlight_title"]
+=== thank you
+
+image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWQ0YzRwNWFicmsza3lnbXRzdGF2dTc3Y3VxNHlxd3kweTE2YzdjNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/atOpRKayP1IJ2/giphy.gif[background]
