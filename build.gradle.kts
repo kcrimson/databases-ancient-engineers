@@ -13,15 +13,25 @@ plugins {
 
 repositories {
     gradlePluginPortal()
+    mavenCentral()
     // https://github.com/jruby-gradle/jruby-gradle-plugin/issues/407
     this as ExtensionAware
     the<RepositoryHandlerExtension>().gems()
 }
 
-dependencies {
-    dependencies {
-        asciidoctorGems("rubygems:asciidoctor-revealjs:4.1.0")
+buildscript {
+    configurations["classpath"].resolutionStrategy.eachDependency {
+        if (requested.group == "com.burgstaller" && requested.name == "okhttp-digest" && requested.version == "1.10") {
+            useTarget("io.github.rburgst:${requested.name}:1.21")
+            because("Dependency has moved")
+        }
     }
+}
+
+
+dependencies {    
+    asciidoctorGems("rubygems:asciidoctor-revealjs:4.1.0")
+    asciidoctorGems("rubygems:asciidoctor-diagram:1.2.1")
 }
 
 tasks.asciidoctorRevealJs {

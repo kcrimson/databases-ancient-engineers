@@ -13,6 +13,7 @@ from ancient engineers manuscripts
 :customcss: css/custom.css
 :revealjs_width: 1920
 :revealjs_height: 1080
+:revealjs_mouseWheel: true
 
 == about me
 
@@ -24,6 +25,14 @@ no JIT and slow as hell GC
 
 speaker, coder, architect
 
+=== WARNING
+
+Over years, in my professional career +
+I have developed strong affection to + 
+programming languages and databases
+
+And I tend to get to emotional and excited when I am talking about it :)
+
 === DISCLAIMER
 
 for the sake of simplicity and entertainment + 
@@ -33,14 +42,6 @@ or presented them in a overly naive way
 there will be a list of references +
 at the end of presentation +
 if you want to go deeper
-
-=== WARNING
-
-Over years, in my professional  +
-I have developed strong affection to + 
-programming languages and databases
-
-And I tend to get to emotional and excited when I am talking about it :)
 
 == what is a database?
 
@@ -66,7 +67,7 @@ and use to come up with new concepts and ideas +
 this is the moment databases where born
 
 [role="highlight_title"]
-=== DBAs at work
+=== ancient DBAs at work
 
 image::TheGeniusInnovationThatMadetheGreatLibraryofAlexandriaWork.jpeg[background,size=cover]
 
@@ -207,7 +208,12 @@ you need to squeeze them into flat, one-dimensional files
 * storing entities unordered vs ordered 
 * schema vs schemaless
 
+[role="highlight_title"]
 === praise the machine
+
+image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNGdmNTBxY3RlMHE2ZThsNjJ3ZWhycG94bXFqdG9udDFpanI3YTBhYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/yJwZtUrulZMUXCLZgu/giphy.gif[background]
+
+=== !
 
 disks are slow (unless you're rich enough to use NVRAM)
 
@@ -248,21 +254,21 @@ image::https://static.javatpoint.com/dbms/images/dbms-heap-file-organization.png
 
 a default storage for indexes in many databases
 
-* The B+ tree is a balanced binary search tree. It follows a multi-level index format.
+* The B+ tree is a balanced  m-ary search tree. It follows a multi-level index format.
 * In the B+ tree, leaf nodes denote actual data pointers. B+ tree ensures that all leaf nodes remain at the same height.
 * In the B+ tree, the leaf nodes are linked using a link list. Therefore, a B+ tree can support random access as well as sequential access.
 * In the B+ tree, every leaf node is at equal distance from the root node. The B+ tree is of the order n where n is fixed for every B+ tree.
 
 === !
 
-* It contains an internal node and leaf node.
+* It contains an internal nodes and leaf nodes.
 * The leaf node of the B+ tree can contain at least n/2 record pointers and n/2 key values.
 * At most, a leaf node contains n record pointer and n key values.
 * Every leaf node of the B+ tree contains one block pointer P to point to next leaf node.
 
 === !
 
-image::https://static.javatpoint.com/dbms/images/dbms-b-plus-tree.png[]
+image::https://upload.wikimedia.org/wikipedia/commons/3/37/Bplustree.png[]
 
 === pros & cons
 
@@ -315,7 +321,8 @@ to reclaim memory for another block
 === !
 
 database data is organized into blocks +
-data is always read and written as a whole block
+data is always read and written as a whole block +
+(aka mechanical sympathy)
 
 === block eviction
 
@@ -508,18 +515,36 @@ query engine is responsible for executing query
 
 [source,sql]
 ----
-SELECT name FROM users where users.age>18 ORDER BY users.age LIMIT 1
+SELECT name FROM users WHERE users.age>18 ORDER BY users.age LIMIT 1
 ----
 
 === Query plan
 
-[source]
+[ditaa,width=800]
 ----
-SequenceScan(users)
-Filter(users.age>18)
-Sort(users.age)
-Limit(1)
-Projection(users.name)
++---------------------+
+| SequenceScan(users) |
++---------------------+
+          |
+          v
++---------------------------+
+| Filter(users.age > 18)    |
++---------------------------+
+          |
+          v
++-------------------+
+| Sort(users.age)   |
++-------------------+
+          |
+          v
++-------------------+
+| Limit(1)          |
++-------------------+
+          |
+          v
++------------------------+
+| Projection(users.name) |
++------------------------+
 ----
 
 === query processing models
@@ -568,7 +593,11 @@ image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNDZybHdvNXZ1Mm5tNGt2MDlqM3d1
 We are going to take a sneak peak +
 under the hood of most common +
 query processing model, iterator model, +
-know also as volcano model
+
+[role="highlight_title"]
+=== know also as volcano model
+
+image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExYjk5cnEwODdpZGZucTZocmF6ajc0djFsNHhnbDFoOWo2OHY5bHE1ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dUIedRUfa35QdQNDA3/giphy.gif[background]
 
 === !
 
@@ -743,7 +772,7 @@ But there are different ways to execute each operator in a query plan (e.g., joi
 
 [source,sql]
 ----
-SELECT name FROM users where users.age>18 ORDER BY users.age LIMIT 1
+SELECT name FROM users WHERE users.age>18 ORDER BY users.age LIMIT 1
 ----
 
 [source]

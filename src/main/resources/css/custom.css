@@ -1,5 +1,8 @@
 .reveal pre code {
   background: black;
+  display: block;
+  max-height: 800px; /* Adjust the height as needed */
+  overflow: auto;    /* Add scrollbars if content exceeds the height */
 }
 
 h1{
