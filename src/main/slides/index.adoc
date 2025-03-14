@@ -838,8 +838,8 @@ flowchart TD
     B --> C("Filter => 'users.age > 18'")
     C --> D("Filter => 'users.active = true'")
     D --> E("Sort => 'users.registration_date'")
-    F --> G("Projection => 'users.name'")
-    G --> H("Limit => 10 rows")
+    E --> F("Projection => 'users.name'")
+    F --> G("Limit => 10 rows")
 ....
 
 === execution plan
@@ -851,8 +851,8 @@ flowchart TD
     B --> C("Filter => 'users.active = true'")
     C --> D("Filter => 'users.age > 18'")
     D --> E("Sort => 'users.registration_date'")
-    F --> G("Projection => 'users.name'")
-    G --> H("Limit => 10 rows")
+    E --> F("Projection => 'users.name'")
+    F --> G("Limit => 10 rows")
 ....
 
 === execution plan
