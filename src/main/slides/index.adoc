@@ -1,7 +1,7 @@
 = Databases
 from ancient engineers manuscripts
 :idprefix:
-:title-slide-background-image: Default_I_need_a_picture_for_the_opening_slide_for_the_present_2.jpg
+:title-slide-background-image: openart-image_4O7jGP_b_1741948237657_raw.png
 :title-slide-background-size: cover
 :stem: asciimath
 :backend: html
@@ -31,13 +31,23 @@ Over years, in my professional career +
 I have developed strong affection to + 
 programming languages and databases
 
-And I tend to get to emotional and excited when I am talking about it :)
+=== !
+
+image::https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmhza2M5dWhrNTFyeWhmd3IwdnljeTJzcTYwamhqNmdybzdsemhrZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NAQoNEtra2e7pfCqxG/giphy.gif[background]
+
+=== !
+
+And I tend to get too emotional and excited when I am talking about it :)
 
 === DISCLAIMER
 
 for the sake of simplicity and entertainment + 
-I have ignored some important concepts, +
+I have ignored some concepts, +
 or presented them in a overly naive way
+
+=== !
+
+**THIS IS NOT COMPUTER SCIENCE CLASS**
 
 there will be a list of references +
 at the end of presentation +
@@ -73,6 +83,15 @@ image::TheGeniusInnovationThatMadetheGreatLibraryofAlexandriaWork.jpeg[backgroun
 
 == a real reason for database systems to exits
 
+=== we need guarantees
+
+(and of course we can relax some of them)
+
+**A**tomicity +
+**I**solation +
+**C**onsistency +
+**D**urability
+
 === 640kb is not enough
 
 Database systems solve the problem of working with data that doesn't fit into RAM, +
@@ -92,16 +111,6 @@ or even single machine (but it is a different story)
 
 === !
 
-we also need guarantees +
-(and of course we can relax some of these)
-
-**A**tomicity +
-**I**solation +
-**C**onsistency +
-**D**urability
-
-=== !
-
 [quote,,attributed to Pat Helland]
   Database is a cache over event log
 
@@ -113,7 +122,10 @@ we also need guarantees +
 == database management systems
 
 **a quick and dirty guide** +
-**for extremely busy developers**
+
+=== for extremely busy developers
+
+image::https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExODN0enp5ajFzZTZwdTNoY2x3bDUxa2hrcThhNDh3dGRsdHU5ZmNmdyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/U16eJ5dFcfiolA5u85/giphy.gif[background]
 
 === !
 
@@ -121,7 +133,11 @@ for the sake of this discussion +
 we will remove distributed databases from the picture +
 and focus on a single database server node
 
-=== the query
+=== in the begning there was a query
+
+image::https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWU1OWI2NDRla25naW44cDJzaHNsdGpweHF4eDRqNDZmbTMwa29qaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/idGw983D7CHrrXa2eO/giphy.gif[background]
+
+=== !
 
 **SELECT users.name** +
 **FROM users** +
@@ -142,6 +158,13 @@ flowchart TD
     E --> H("Transaction Log")
     G --> I("Database Storage")
 ....
+
+=== !
+
+**SELECT users.name** +
+**FROM users** +
+**WHERE users.age>18 AND users.active=true** +
+**ORDER BY users.registration_date LIMIT 10** 
 
 === AST tree
 
@@ -168,12 +191,10 @@ flowchart TD
 ....
 flowchart TD
     A("Logical Plan") --> B("Scan 'users' Table")
-    B --> C("Filter rows where 'users.age > 18'")
-    B --> D("Filter rows where 'users.active = true'")
-    C --> E("Combine Filters with AND")
-    E --> F("Project 'users.name'")
-    F --> G("Sort by 'users.registration_date'")
-    G --> H("Limit 10")
+    B --> C("Filter => 'users.age > 18' and 'users.active = true'")
+    C --> D("Sort => 'users.registration_date'")
+    D --> F("Projection => 'users.name'")
+    F --> G("Limit => 10 rows")
 ....
 
 === execution plan
@@ -181,11 +202,11 @@ flowchart TD
 [mermaid,height=800,theme=forest]
 ....
 flowchart TD
-    A("Physical Plan") --> B("Index Range Scan on 'users.age'")
-    B --> C("Filter using Index: 'users.active = true'")
-    C --> D("Fetch 'users.name' from Row IDs")
-    D --> E("Index Sort by 'users.registration_date'")
-    E --> F("Limit 10 Rows")
+    A("Physical Plan") --> B("Index Range Scan => 'users.age'")
+    B --> C("Filter => 'users.active = true'")
+    C --> D("Projection => 'users.name'")
+    D --> E("Index Sort => 'users.registration_date'")
+    E --> F("Limit => 10 rows")
 ....
 
 === !
@@ -204,6 +225,21 @@ How these translate into actual data access operations?
 
 will take a bottom-up approach to explain how things work
 
+=== !
+
+[mermaid,height=800,theme=forest]
+....
+flowchart TD
+    A("Database Query") --> B("Query Parsing")
+    B --> C("Query Planning")
+    C --> D("Query Plan Optimization")
+    D --> E("Query Plan Execution")
+    E --> F("Lock Manager")
+    F --> G("Block Manager")
+    E --> H("Transaction Log")
+    G --> I("Database Storage")
+....
+
 [role="highlight_title"]
 == storage
 
@@ -219,19 +255,21 @@ you need to squeeze them into flat, one-dimensional files
 === important factors
 
 * storing entities as fixed size vs variable size records
-* storing entities unordered vs ordered 
-* schema vs schemaless
+* storing entities unordered vs ordered collections 
+* entities have schema vs schemaless
 
 [role="highlight_title"]
 === praise the machine
 
 image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNGdmNTBxY3RlMHE2ZThsNjJ3ZWhycG94bXFqdG9udDFpanI3YTBhYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/yJwZtUrulZMUXCLZgu/giphy.gif[background]
 
-=== !
+=== universal laws of computer engineering
 
-disks are slow (unless you're rich enough to use NVRAM)
+**disks are slow (unless you're rich enough to use NVRAM)**
 
-operating system always read/writes data in fixed size pages
+**operating system always read/writes data in fixed size pages**
+
+**CPU and memory controllers find it difficult to chase pointers**
 
 === unordered files
 
@@ -248,7 +286,33 @@ operating system always read/writes data in fixed size pages
 
 === !
 
-image::https://static.javatpoint.com/dbms/images/dbms-heap-file-organization.png[]
+[mermaid,scale=8,theme=forest]
+....
+flowchart LR
+  subgraph "Heap File"
+    direction LR
+    subgraph B1["Block 1"]
+      direction LR
+      R11["Record 1"] --- R12["Record 2"] --- R13["Record 3"]
+      R13 --- FS1["Free Space 1KB"]
+    end
+    subgraph B2["Block 2"] 
+      direction LR
+      R21["Record 1"] --- R22["Record 2"] --- R23["Record 3"] --- R24["Record 4"]
+      R24 --- FS2["Free Space 0.5KB"]
+    end
+    subgraph B3["Block 3"]
+      direction LR
+      R31["Record 1"] --- R32["Record 2"]
+      R32 --- FS3["Free Space 2KB"]
+    end
+    subgraph B4["Block 4"]
+      direction LR
+      FS4["Free Space 4KB"]
+    end
+    B1 --> B2 --> B3 --> B4
+  end
+....
 
 === pros & cons
 
@@ -311,7 +375,7 @@ how to squeeze more data than you have available memory?
 you don't always need all the data + 
 (we call it liveset)
 
-block manager loads data on demand when needed +
+block manager loads data on demand, when needed +
 unloads when data is no longer used
 
 === !
@@ -417,16 +481,6 @@ and higher-level (like table or row level) locks
 [quote,,What are some best practices for implementing row-level locking?]
   Evaluate the average row size, and based on that number of rows you will have on one page. If you have hundreds of rows on a page stop right here because you won't see any increase throughput. All the contention will just switch from row level to page level and explicit locking will have no positive impact.
 
-=== shadow pages
-
-when we lock on a block for write, + 
-to isolate reads from writes, +
-we often use technique called shadow pages +
-where we create a copy of a actual block,
-and make modifications in a copy, +
-when transaction is committed we replace +
-original block with newly create block
-
 [role="highlight_title"]
 == transaction log
 
@@ -460,7 +514,7 @@ the fact that you asked operating system to write block of data, +
 doesn't mean it is persistent when system call returns, +
 because operating system also has a thing called page cache
 
-=== filesystems are first databases
+=== filesystems are databases
 
 === !
 
@@ -474,6 +528,16 @@ in database and operating systems community)
 === journal file
 
 When a transaction modifies a page, the DBMS copies the original page to a separate journal file before overwriting the master version. After restarting, if a journal file exists, then the DBMS restores it to undo changes from uncommited transactions.
+
+=== shadow pages
+
+when we lock on a block for write, + 
+to isolate reads from writes, +
+we often use technique called shadow pages +
+where we create a copy of a actual block,
+and make modifications in a copy, +
+when transaction is committed we replace +
+original block with newly create block
 
 === write ahead log
 
