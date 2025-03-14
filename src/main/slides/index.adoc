@@ -589,42 +589,6 @@ query is parsed and transformed into a query plan
 
 query engine is responsible for executing query
 
-=== Query
-
-[source,sql]
-----
-SELECT name FROM users WHERE users.age>18 ORDER BY users.age LIMIT 1
-----
-
-=== Query plan
-
-[ditaa,width=800]
-----
-+---------------------+
-| SequenceScan(users) |
-+---------------------+
-          |
-          v
-+---------------------------+
-| Filter(users.age > 18)    |
-+---------------------------+
-          |
-          v
-+-------------------+
-| Sort(users.age)   |
-+-------------------+
-          |
-          v
-+-------------------+
-| Limit(1)          |
-+-------------------+
-          |
-          v
-+------------------------+
-| Projection(users.name) |
-+------------------------+
-----
-
 === query processing models
 
 Operators are function-like pieces of code +
@@ -839,7 +803,7 @@ class QueryExecution {
 [role="highlight_title"]
 == query planner
 
-image::https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExaTJ2MXhpYmxmdnd1bzg0dHNmamtrdnRvb3piNDJxMjZtcDF4cHNzdCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/usz0fqhUiVxSs6IUKB/giphy.gif[background]
+image::https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExeWM4ZXIwZzE1dDN1aDJtbjFmbm9zaGhyZzNzcHB4bDFldGtla3RsMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/61jhLbOyn4x05KP5qf/giphy.gif[background]
 
 === !
 
@@ -850,27 +814,58 @@ But there are different ways to execute each operator in a query plan (e.g., joi
 
 [source,sql]
 ----
-SELECT name FROM users WHERE users.age>18 ORDER BY users.age LIMIT 1
-----
-
-[source]
-----
-SequenceScan(users)
-Filter(users.age>18)
-Sort(users.age)
-Limit(1)
-Projection(users.name)
+SELECT users.name FROM users WHERE users.age>18 AND users.active=true ORDER BY users.registration_date LIMIT 10 
 ----
 
 === !
 
-[source]
-----
-RangeIndexScan(users.age>18)
-Sort(users.age)
-Limit(1)
-Projection(users.name)
-----
+[mermaid,height=800,theme=forest]
+....
+flowchart TD
+    A("Logical Plan") --> B("Scan 'users' Table")
+    B --> C("Filter => 'users.age > 18' and 'users.active = true'")
+    C --> D("Sort => 'users.registration_date'")
+    D --> F("Projection => 'users.name'")
+    F --> G("Limit => 10 rows")
+....
+
+=== execution plan
+
+[mermaid,height=800,theme=forest]
+....
+flowchart TD
+    A("Physical Plan") --> B("Scan 'users' Table")
+    B --> C("Filter => 'users.age > 18'")
+    C --> D("Filter => 'users.active = true'")
+    D --> E("Sort => 'users.registration_date'")
+    F --> G("Projection => 'users.name'")
+    G --> H("Limit => 10 rows")
+....
+
+=== execution plan
+
+[mermaid,height=800,theme=forest]
+....
+flowchart TD
+    A("Physical Plan") --> B("Scan 'users' Table")
+    B --> C("Filter => 'users.active = true'")
+    C --> D("Filter => 'users.age > 18'")
+    D --> E("Sort => 'users.registration_date'")
+    F --> G("Projection => 'users.name'")
+    G --> H("Limit => 10 rows")
+....
+
+=== execution plan
+
+[mermaid,height=800,theme=forest]
+....
+flowchart TD
+    A("Physical Plan") --> B("Index Range Scan => 'users.age'")
+    B --> C("Filter => 'users.active = true'")
+    C --> D("Projection => 'users.name'")
+    D --> E("Index Sort => 'users.registration_date'")
+    E --> F("Limit => 10 rows")
+....
 
 === query planner
 
